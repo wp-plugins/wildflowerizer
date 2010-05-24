@@ -3,15 +3,15 @@
  * Plugin Name: Wildflowerizer
  * Plugin URI: http://blog.tafoni.net/2010/05/01/4/
  * Description: Add a flower widget to your blog's sidebar. Flowers from the collaborative field guide: Wildflower Field Guide, North America.
- * Version: 1.0
+ * Version: 1.1
  * Author: Dawn Endico
  * Author URI: http://www.tafoni.net/
  * License:  Released under GNU Lesser General Public License (http://www.gnu.org/copyleft/lgpl.html)
-*/
+ */
 
-if (!preg_match("/phpFlickr/", ini_get('include_path'))) {
-  require_once("phpFlickr/phpFlickr.php");
-} 
+if ( !class_exists('phpFlickr') ) {
+  require_once("phpFlickr.php");
+}
 
 /**
  * Add function to widgets_init that'll load our widget.
@@ -51,7 +51,7 @@ class Wildflowerizer_Widget extends WP_Widget {
     $image_size = $instance['image_size']?$instance['image_size']:"Small";
 
     $f = new phpFlickr("58be12103b9f93f2b69a63001360df90");
-    $f->enableCache("fs", $_SERVER["DOCUMENT_ROOT"] . "/phpFlickrCache");
+    $f->enableCache('custom', array(array('Wildflowerizer_Widget', 'cache_get'), array('Wildflowerizer_Widget', 'cache_set')));
 
     $group = $f->urls_lookupGroup("http://www.flickr.com/groups/wildflowers/");
     $wfgna_group_id = $group[id];
@@ -133,6 +133,42 @@ class Wildflowerizer_Widget extends WP_Widget {
 
   <?php
   }
+  function cache_get($key) {
+           global $wpdb;
+           $result = $wpdb->get_row('
+                   SELECT
+                           *
+                   FROM
+                           `' . $wpdb->prefix . 'phpflickr_cache`
+                   WHERE
+                           request = "' . $wpdb->escape($key) . '" AND
+                           expiration >= NOW()
+           ');
+           if ( is_null($result) ) return false;
+           return $result->response;
+   }
+
+   function cache_set($key, $value, $expire) {
+           global $wpdb;
+           $query = '
+                   INSERT INTO `' . $wpdb->prefix . 'phpflickr_cache`
+                           (
+                                   request,
+                                   response,
+                                   expiration
+                           )
+                   VALUES
+                           (
+                                   "' . $wpdb->escape($key) . '",
+                                   "' . $wpdb->escape($value) . '",
+                                   FROM_UNIXTIME(' . (time() + (int) $expire) . ')
+                           )
+                   ON DUPLICATE KEY UPDATE
+                           response = VALUES(response),
+                           expiration = VALUES(expiration)
+           ';
+           $wpdb->query($query);
+   }
 }
 
 ?>

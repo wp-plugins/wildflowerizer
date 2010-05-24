@@ -4,7 +4,7 @@ Donate link: http://blog.tafoni.net/donate/
 Tags: widget, sidebar, image, images, photo, photos, nature, botany, flower, wildflower
 Requires at least: 2.9.2
 Tested up to: 2.9.2
-Stable tag: 1.0
+Stable tag: 1.1
 
 Add a flower widget to your blog's sidebar. Flowers from the collaborative field guide: Wildflower Field Guide, North America.
 
@@ -40,8 +40,12 @@ If your theme doesn't support widgets, you can still use the widget by adding th
 = 1.0 =
 * Initial release
 
+= 1.1 =
+* Updated phpFlickr and fixed a data visibility problem with the cache. The plugin will now work on sites that aren't installed at the domain's root. Upgrade recommended for all users.
+
 == Credits ==
 
-This plugin uses phpFlickr which is a class written by Dan Coulter 
+This plugin uses [phpFlickr](http://phpflickr.com/) 
+which is a class written by Dan Coulter 
 in PHP to act as a wrapper for the Flickr API. 
 
